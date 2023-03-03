@@ -12,13 +12,13 @@
  *  express or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-import React from 'react';
-import { Auth } from 'aws-amplify';
-import DynamicImage from '../components/DynamicImage';
+import React from "react";
+import { Auth } from "aws-amplify";
+import DynamicImage from "../components/DynamicImage";
 //import { withRouter } from 'react-router-dom';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import '../css/app.css';
+import "../css/app.css";
 
 /**
  * Sign-in Page
@@ -28,27 +28,26 @@ class SignIn extends React.Component {
     super(props);
     this.state = {
       stage: 0,
-      email: '',
-      password: '',
-      code: '',
-      userObject: null
+      email: "",
+      password: "",
+      code: "",
+      userObject: null,
     };
   }
 
   async onSubmitForm(e) {
     e.preventDefault();
-    console.log('Form Submitted');
+    console.log("Form Submitted");
     this.setState({ stage: 1 });
   }
 
   async onSubmitVerification(e) {
     e.preventDefault();
-    console.log('Verification Submitted');
-    this.setState({ stage: 0, email: '', password: '', code: '' });
-    // Go back home
-    this.props.history.replace('/');
-  }
+    console.log("Verification Submitted");
+    this.setState({ stage: 0, email: "", password: "", code: "" });
 
+    window.location.replace("/");
+  }
 
   onEmailChanged(e) {
     this.setState({ email: e.target.value.toLowerCase() });
@@ -63,7 +62,8 @@ class SignIn extends React.Component {
   }
 
   isValidEmail(email) {
-    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }
 
@@ -74,14 +74,30 @@ class SignIn extends React.Component {
     return (
       <div className="app">
         <header>
-          <DynamicImage src="logo.png"/>
+          <DynamicImage src="logo.png" />
         </header>
         <section className="form-wrap">
           <h1>Sign in</h1>
           <form id="registrationForm" onSubmit={(e) => this.onSubmitForm(e)}>
-            <input className={isValidEmail?'valid':'invalid'} type="email" placeholder="Email" value={this.state.email} onChange={(e) => this.onEmailChanged(e)}/>
-            <input className={isValidPassword?'valid':'invalid'} type="password" placeholder="Password" value={this.state.password} onChange={(e) => this.onPasswordChanged(e)}/>
-            <input disabled={!(isValidEmail && isValidPassword)} type="submit" value="Let's Ryde"/>
+            <input
+              className={isValidEmail ? "valid" : "invalid"}
+              type="email"
+              placeholder="Email"
+              value={this.state.email}
+              onChange={(e) => this.onEmailChanged(e)}
+            />
+            <input
+              className={isValidPassword ? "valid" : "invalid"}
+              type="password"
+              placeholder="Password"
+              value={this.state.password}
+              onChange={(e) => this.onPasswordChanged(e)}
+            />
+            <input
+              disabled={!(isValidEmail && isValidPassword)}
+              type="submit"
+              value="Let's Ryde"
+            />
           </form>
         </section>
       </div>
@@ -95,14 +111,29 @@ class SignIn extends React.Component {
     return (
       <div className="app">
         <header>
-          <DynamicImage src="logo.png"/>
+          <DynamicImage src="logo.png" />
         </header>
         <section className="form-wrap">
           <h1>Enter MFA Code</h1>
           <form id="verifyForm" onSubmit={(e) => this.onSubmitVerification(e)}>
-            <input className={isValidEmail?'valid':'invalid'} type="email" placeholder="Email" value={this.state.email}/>
-            <input className={isValidCode?'valid':'invalid'} type="text" placeholder="Verification Code" value={this.state.code} onChange={(e) => this.onCodeChanged(e)}/>
-            <input disabled={!(isValidCode&&isValidEmail)} type="submit" value="Verify"/>
+            <input
+              className={isValidEmail ? "valid" : "invalid"}
+              type="email"
+              placeholder="Email"
+              value={this.state.email}
+            />
+            <input
+              className={isValidCode ? "valid" : "invalid"}
+              type="text"
+              placeholder="Verification Code"
+              value={this.state.code}
+              onChange={(e) => this.onCodeChanged(e)}
+            />
+            <input
+              disabled={!(isValidCode && isValidEmail)}
+              type="submit"
+              value="Verify"
+            />
           </form>
         </section>
       </div>
@@ -120,7 +151,7 @@ class SignIn extends React.Component {
   }
 }
 
-const withRouter = Component => props => {
+const withRouter = (Component) => (props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -136,4 +167,3 @@ const withRouter = Component => props => {
 };
 
 export default withRouter(SignIn);
-

@@ -12,13 +12,31 @@
  *  express or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-import React from 'react';
-import { Auth } from 'aws-amplify';
-import DynamicImage from '../components/DynamicImage';
-//import { withRouter } from 'react-router-dom';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import React from "react";
+import { Auth } from "aws-amplify";
+import DynamicImage from "../components/DynamicImage";
+// import { withRouter } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import '../css/app.css';
+import "../css/app.css";
+
+async function cognitoSignUp(params) {
+  try {
+    const { user } = await Auth.signUp(params);
+    console.log(user);
+  } catch (error) {
+    console.log("error signing up:", error);
+  }
+}
+
+async function confirmCognitoSignUp(username, code) {
+  try {
+    console.log(`CONFIRMING:  ${username}: code ${code}`);
+    await Auth.confirmSignUp(username, code);
+  } catch (error) {
+    console.log("error confirming sign up", error);
+  }
+}
 
 /**
  * Registration Page
@@ -28,30 +46,46 @@ class SignUp extends React.Component {
     super(props);
     this.state = {
       stage: 0,
-      email: '',
-      phone: '',
-      password: '',
-      confirm: '',
-      code: ''
+      email: "",
+      phone: "",
+      password: "",
+      confirm: "",
+      code: "",
     };
   }
 
   async onSubmitForm(e) {
     e.preventDefault();
-    console.log('Form Submitted');
+
+    const signupParams = {
+      username: this.state.email,
+      password: this.state.password,
+      autoSignIn: {
+        enabled: true,
+      },
+    };
+    console.log("signupParams", signupParams);
+    await cognitoSignUp(signupParams);
+
+    console.log("Form Submitted");
     this.setState({ stage: 1 });
   }
 
   async onSubmitVerification(e) {
     e.preventDefault();
-    console.log('Verification Submitted');
-    this.setState({ 
-      stage: 0, code: '',
-      email: '', phone: '', 
-      password: '', confirm: ''
+
+    await confirmCognitoSignUp(this.state.email, this.state.code);
+    console.log("Verification Submitted");
+    this.setState({
+      stage: 0,
+      code: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirm: "",
     });
-    // Go back to the home page
-    this.props.history.replace('/');
+
+    window.location.replace("/signin");
   }
 
   onEmailChanged(e) {
@@ -75,28 +109,60 @@ class SignUp extends React.Component {
   }
 
   isValidEmail(email) {
-    var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }
 
   renderSignUp() {
     const isValidEmail = this.isValidEmail(this.state.email);
     const isValidPassword = this.state.password.length > 1;
-    const isValidConfirmation = isValidPassword && this.state.password === this.state.confirm;
+    const isValidConfirmation =
+      isValidPassword && this.state.password === this.state.confirm;
 
     return (
       <div className="app">
         <header>
-          <DynamicImage src="logo.png"/>
+          <DynamicImage src="logo.png" />
         </header>
         <section className="form-wrap">
           <h1>Register</h1>
           <form id="registrationForm" onSubmit={(e) => this.onSubmitForm(e)}>
-            <input className={isValidEmail?'valid':'invalid'} type="email" placeholder="Email" value={this.state.email} onChange={(e) => this.onEmailChanged(e)}/>
-            <input className='valid' type="phone" placeholder="Phone" value={this.state.phone} onChange={(e) => this.onPhoneChanged(e)}/>
-            <input className={isValidPassword?'valid':'invalid'} type="password" placeholder="Password" value={this.state.password} onChange={(e) => this.onPasswordChanged(e)}/>
-            <input className={isValidConfirmation?'valid':'invalid'} type="password" placeholder="Confirm Password" value={this.state.confirm} onChange={(e) => this.onConfirmationChanged(e)}/>
-            <input disabled={!(isValidEmail && isValidPassword && isValidConfirmation)} type="submit" value="Let's Ryde"/>
+            <input
+              className={isValidEmail ? "valid" : "invalid"}
+              type="email"
+              placeholder="Email"
+              value={this.state.email}
+              onChange={(e) => this.onEmailChanged(e)}
+            />
+            <input
+              className="valid"
+              type="phone"
+              placeholder="Phone"
+              value={this.state.phone}
+              onChange={(e) => this.onPhoneChanged(e)}
+            />
+            <input
+              className={isValidPassword ? "valid" : "invalid"}
+              type="password"
+              placeholder="Password"
+              value={this.state.password}
+              onChange={(e) => this.onPasswordChanged(e)}
+            />
+            <input
+              className={isValidConfirmation ? "valid" : "invalid"}
+              type="password"
+              placeholder="Confirm Password"
+              value={this.state.confirm}
+              onChange={(e) => this.onConfirmationChanged(e)}
+            />
+            <input
+              disabled={
+                !(isValidEmail && isValidPassword && isValidConfirmation)
+              }
+              type="submit"
+              value="Let's Ryde"
+            />
           </form>
         </section>
       </div>
@@ -110,14 +176,29 @@ class SignUp extends React.Component {
     return (
       <div className="app">
         <header>
-          <DynamicImage src="logo.png"/>
+          <DynamicImage src="logo.png" />
         </header>
         <section className="form-wrap">
           <h1>Verify Email</h1>
           <form id="verifyForm" onSubmit={(e) => this.onSubmitVerification(e)}>
-            <input className={isValidEmail?'valid':'invalid'} type="email" placeholder="Email" value={this.state.email}/>
-            <input className={isValidCode?'valid':'invalid'} type="text" placeholder="Verification Code" value={this.state.code} onChange={(e) => this.onCodeChanged(e)}/>
-            <input disabled={!(isValidCode&&isValidEmail)} type="submit" value="Verify"/>
+            <input
+              className={isValidEmail ? "valid" : "invalid"}
+              type="email"
+              placeholder="Email"
+              value={this.state.email}
+            />
+            <input
+              className={isValidCode ? "valid" : "invalid"}
+              type="text"
+              placeholder="Verification Code"
+              value={this.state.code}
+              onChange={(e) => this.onCodeChanged(e)}
+            />
+            <input
+              disabled={!(isValidCode && isValidEmail)}
+              type="submit"
+              value="Verify"
+            />
           </form>
         </section>
       </div>
@@ -135,12 +216,12 @@ class SignUp extends React.Component {
   }
 }
 
-
-const withRouter = Component => props => {
+const withRouter = (Component) => (props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
 
+  console.log("PROPS", props);
   return (
     <Component
       {...props}

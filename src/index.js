@@ -12,23 +12,32 @@
  *  express or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Home, FAQ, Investors, MainApp, Unicorns, Profile } from './pages';
-import { SignIn, SignUp } from './auth';
-import 'normalize.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { Home, FAQ, Investors, MainApp, Unicorns, Profile } from "./pages";
+import { SignIn, SignUp } from "./auth";
+import "normalize.css";
 
-const isAuthenticated = () => false; 
+import { Amplify, Auth } from "aws-amplify";
+import awsconfig from "./amplify-config";
+Amplify.configure(awsconfig);
+
+console.log("AMPLIFY", JSON.stringify(awsconfig));
+
+const isAuthenticated = () => false;
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}
-    render={props => (
-    isAuthenticated() === true
-      ? <Component {...props} />
-      : <Navigate to='/signin' />
-  )} />
+    render={(props) =>
+      isAuthenticated() === true ? (
+        <Component {...props} />
+      ) : (
+        <Navigate to="/signin" />
+      )
+    }
+  />
 );
 
 class App extends React.Component {
@@ -37,20 +46,20 @@ class App extends React.Component {
       <BrowserRouter>
         <Routes>
           <Route exact path="/" element={<Home />} />
-          <Route path="/faq" element={<FAQ /> } />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/investors" element={<Investors />} />
           <Route path="/unicorns" element={<Unicorns />} />
           <Route path="/register" element={<SignUp />} />
-	        <Route path="/signin" element={<SignIn />} />
+          <Route path="/signin" element={<SignIn />} />
           <Route path="/profile" element={<Profile />} />
-          <Route exact path='/app' element={<MainApp />}/>
+          <Route exact path="/app" element={<MainApp />} />
         </Routes>
       </BrowserRouter>
     );
   }
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
