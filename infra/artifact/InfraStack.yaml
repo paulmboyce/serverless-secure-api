@@ -15,10 +15,6 @@ Resources:
       EmailVerificationMessage: The verification code to your new account is {####}
       EmailVerificationSubject: Verify your new account
       SmsVerificationMessage: The verification code to your new account is {####}
-      UserAttributeUpdateSettings:
-        AttributesRequireVerificationBeforeUpdate:
-          - email
-          - phone_number
       UsernameAttributes:
         - email
       UserPoolAddOns:
@@ -33,6 +29,14 @@ Resources:
     DeletionPolicy: Retain
     Metadata:
       aws:cdk:path: InfraStack/WildRides/Resource
+  WildRidesuserPoolDomainC26872EB:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: wild-rides-oauth2
+      UserPoolId:
+        Ref: WildRides663E9274
+    Metadata:
+      aws:cdk:path: InfraStack/WildRides/userPoolDomain/Resource
   WildRideswildrydeswebapp34884050:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -59,13 +63,132 @@ Resources:
         - COGNITO
     Metadata:
       aws:cdk:path: InfraStack/WildRides/wildrydes-web-app/Resource
+  authRoleB7A6401B:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+        Version: "2012-10-17"
+      RoleName: wildrydes-auth-role
+    Metadata:
+      aws:cdk:path: InfraStack/authRole/Resource
+  myIdentityPool20FFFFF9:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: false
+      AllowClassicFlow: false
+      CognitoIdentityProviders:
+        - ClientId:
+            Ref: WildRideswildrydeswebapp34884050
+          ProviderName:
+            Fn::Join:
+              - ""
+              - - cognito-idp.
+                - Ref: AWS::Region
+                - "."
+                - Ref: AWS::URLSuffix
+                - /
+                - Ref: WildRides663E9274
+          ServerSideTokenCheck: true
+      IdentityPoolName: wildrydes_identity_pool
+    DependsOn:
+      - WildRides663E9274
+      - WildRidesuserPoolDomainC26872EB
+      - WildRideswildrydeswebapp34884050
+    Metadata:
+      aws:cdk:path: InfraStack/myIdentityPool/Resource
+  myIdentityPoolUnauthenticatedRole71F5A1F9:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud:
+                  Ref: myIdentityPool20FFFFF9
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: unauthenticated
+            Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+        Version: "2012-10-17"
+      Description:
+        Fn::Join:
+          - ""
+          - - "Default Unauthenticated Role for Identity Pool "
+            - Fn::GetAtt:
+                - myIdentityPool20FFFFF9
+                - Name
+    DependsOn:
+      - WildRides663E9274
+      - WildRidesuserPoolDomainC26872EB
+      - WildRideswildrydeswebapp34884050
+    Metadata:
+      aws:cdk:path: InfraStack/myIdentityPool/UnauthenticatedRole/Resource
+  myIdentityPoolDefaultRoleAttachmentACA08CAC:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId:
+        Ref: myIdentityPool20FFFFF9
+      Roles:
+        authenticated:
+          Fn::GetAtt:
+            - authRoleB7A6401B
+            - Arn
+        unauthenticated:
+          Fn::GetAtt:
+            - myIdentityPoolUnauthenticatedRole71F5A1F9
+            - Arn
+    DependsOn:
+      - WildRides663E9274
+      - WildRidesuserPoolDomainC26872EB
+      - WildRideswildrydeswebapp34884050
+    Metadata:
+      aws:cdk:path: InfraStack/myIdentityPool/DefaultRoleAttachment/Resource
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Analytics: v2:deflate64:H4sIAAAAAAAA/03JQQrCMBCF4bN0n4xGoeA6F5CKa2mTUaaNM5BJ7aL07lqK4up9/O8A9RH2VTupDXGwiTqYL6UNg/mkW5AHUxGYr4r5LJKMv/PPX/hEyOX/2sqypgZVxhxwtReOVEh4MSwRodfdy9XgTuCqXolsHrnQE6HZ9g0RXzdxnQAAAA==
+      Analytics: v2:deflate64:H4sIAAAAAAAA/32PT2+DMAzFPwv3xMAqUe3WiV12WsW0c5VBVlxCjEjYVEX57g3/Onbp6dm/OPZ7T+CyHSSR+DW8rBqu8AvchxVlwwI6uZLOGi2B+zSyPxIpln/re70Wr9QK1NunhaxtrlBqux34I29VKNBe1+3bviAlX2ywU7cBeoaiBTfCcXBU71khDQ19OaH3wXbDtHVLc9IVWiTtWbaHhAvV1SKEPiyp40nnpByX8104v0y6fxYf+PNMUyXhYuKfNIP0GdLoYhB5P4QfrYRi1hv2YTmidQEAAA==
     Metadata:
       aws:cdk:path: InfraStack/CDKMetadata/Default
     Condition: CDKMetadataAvailable
+Outputs:
+  UserPoolID:
+    Value:
+      Ref: WildRides663E9274
+  UserPoolARN:
+    Value:
+      Fn::GetAtt:
+        - WildRides663E9274
+        - Arn
+  UserPoolDomain:
+    Value:
+      Ref: WildRidesuserPoolDomainC26872EB
+  UserPoolDomainBASEURL:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: WildRidesuserPoolDomainC26872EB
+          - .auth.
+          - Ref: AWS::Region
+          - .amazoncognito.com
+  UserPoolCLIENTID:
+    Value:
+      Ref: WildRideswildrydeswebapp34884050
+  IdentiyPoolName:
+    Value:
+      Fn::GetAtt:
+        - myIdentityPool20FFFFF9
+        - Name
+  IdentiyPoolID:
+    Value:
+      Ref: myIdentityPool20FFFFF9
 Conditions:
   CDKMetadataAvailable:
     Fn::Or:
