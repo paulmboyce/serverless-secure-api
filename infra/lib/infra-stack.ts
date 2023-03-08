@@ -12,7 +12,7 @@ import {
   UserPoolDomainOptions,
   OAuthSettings,
 } from "aws-cdk-lib/aws-cognito";
-import { Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { PolicyStatement, Effect } from "aws-cdk-lib/aws-iam";
 
 import {
   IdentityPool,
@@ -73,11 +73,6 @@ export class InfraStack extends Stack {
     };
     const client = userPool.addClient("wildrydes-web-app", clientParams);
 
-    const authRole = new Role(this, "authRole", {
-      roleName: "wildrydes-auth-role",
-      assumedBy: new ServicePrincipal("s3.amazonaws.com"),
-    });
-
     const identityPoolProps: IdentityPoolProps = {
       identityPoolName: "wildrydes_identity_pool",
       authenticationProviders: {
@@ -90,13 +85,21 @@ export class InfraStack extends Stack {
       },
       allowClassicFlow: false,
       allowUnauthenticatedIdentities: false,
-      authenticatedRole: authRole,
     };
 
     const identityPool = new IdentityPool(
       this,
       "myIdentityPool",
       identityPoolProps
+    );
+
+    //Add permissions to Authenticated Users role
+    identityPool.authenticatedRole.addToPrincipalPolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ["dynamodb:*"],
+        resources: ["*"],
+      })
     );
 
     new CfnOutput(this, "UserPool ID", { value: userPool.userPoolId });
