@@ -85,7 +85,7 @@ class SignUp extends React.Component {
       confirm: "",
     });
 
-    window.location.replace("/signin");
+    this.props.navigate("/signin");
   }
 
   onEmailChanged(e) {
@@ -219,6 +219,7 @@ class SignUp extends React.Component {
 const withRouter = (Component) => (props) => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const params = useParams();
 
   console.log("PROPS", props);

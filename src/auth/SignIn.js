@@ -46,7 +46,7 @@ class SignIn extends React.Component {
     console.log("Verification Submitted");
     this.setState({ stage: 0, email: "", password: "", code: "" });
 
-    window.location.replace("/");
+    this.props.navigate("/");
   }
 
   onEmailChanged(e) {
