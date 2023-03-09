@@ -12,28 +12,29 @@
  *  express or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
  */
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
 const PageList = () => {
-    const pages = [
-        { url: '/', title: 'Home' },
-        { url: '/unicorns', title: 'Meet the Unicorns' },
-        { url: '/investors', title: 'Investors & Board of Directors' },
-        { url: '/faq', title: 'FAQ' },
-        { url: '/profile', title: 'Profile' },
-        { url: '/register', title: 'Apply' }
-    ];
+  const pages = [
+    { url: "/", title: "Home" },
+    { url: "/unicorns", title: "Meet the Unicorns" },
+    { url: "/investors", title: "Investors & Board of Directors" },
+    { url: "/faq", title: "FAQ" },
+    { url: "/profile", title: "Profile" },
+    { url: "/register", title: "Apply" },
+    { url: "/signin", title: "Login" },
+  ];
 
-    return (
-      <ul>
-        {
-          pages.map((v, i) => (
-            <li key={i}><Link to={v.url}>{v.title}</Link></li>
-          ))
-        }
-      </ul>
-    );
+  return (
+    <ul>
+      {pages.map((v, i) => (
+        <li key={i}>
+          <Link to={v.url}>{v.title}</Link>
+        </li>
+      ))}
+    </ul>
+  );
 };
 
 export default PageList;

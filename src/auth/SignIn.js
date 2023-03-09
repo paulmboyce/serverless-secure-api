@@ -20,6 +20,16 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import "../css/app.css";
 
+async function signIn(username, password) {
+  try {
+    const user = await Auth.signIn(username, password);
+    console.log(`Auth.signIn(): LOGGED IN USER: ${username}`, user);
+  } catch (error) {
+    console.log("Auth.signIn(): error signing in", error);
+    throw error;
+  }
+}
+
 /**
  * Sign-in Page
  */
@@ -38,7 +48,15 @@ class SignIn extends React.Component {
   async onSubmitForm(e) {
     e.preventDefault();
     console.log("Form Submitted");
-    this.setState({ stage: 1 });
+    try {
+      await signIn(this.state.email, this.state.password);
+      console.log("Signedin OK");
+      this.props.navigate("/app");
+      //   this.setState({ stage: 1 });
+    } catch (error) {
+      console.log("onSubmitForm():", error);
+      alert(error);
+    }
   }
 
   async onSubmitVerification(e) {

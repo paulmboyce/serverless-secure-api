@@ -25,7 +25,8 @@ async function cognitoSignUp(params) {
     const { user } = await Auth.signUp(params);
     console.log(user);
   } catch (error) {
-    console.log("error signing up:", error);
+    console.log("cognitoSignUp(): error signing up:", error);
+    throw error;
   }
 }
 
@@ -34,7 +35,7 @@ async function confirmCognitoSignUp(username, code) {
     console.log(`CONFIRMING:  ${username}: code ${code}`);
     await Auth.confirmSignUp(username, code);
   } catch (error) {
-    console.log("error confirming sign up", error);
+    console.log("confirmCognitoSignUp(): error confirming sign up", error);
   }
 }
 
@@ -64,28 +65,35 @@ class SignUp extends React.Component {
         enabled: true,
       },
     };
-    console.log("signupParams", signupParams);
-    await cognitoSignUp(signupParams);
 
     console.log("Form Submitted");
-    this.setState({ stage: 1 });
+    try {
+      await cognitoSignUp(signupParams);
+      this.setState({ stage: 1 });
+    } catch (error) {
+      console.log("onSubmitForm:", error);
+    }
   }
 
   async onSubmitVerification(e) {
     e.preventDefault();
 
-    await confirmCognitoSignUp(this.state.email, this.state.code);
-    console.log("Verification Submitted");
-    this.setState({
-      stage: 0,
-      code: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirm: "",
-    });
+    try {
+      await confirmCognitoSignUp(this.state.email, this.state.code);
+      console.log("Verification Submitted");
+      this.setState({
+        stage: 0,
+        code: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirm: "",
+      });
 
-    this.props.navigate("/signin");
+      this.props.navigate("/signin");
+    } catch (error) {
+      console.log("onSubmitVerification():", error);
+    }
   }
 
   onEmailChanged(e) {

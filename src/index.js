@@ -25,7 +25,11 @@ Amplify.configure(awsconfig);
 
 console.log("AMPLIFY", JSON.stringify(awsconfig));
 
-const isAuthenticated = () => false;
+const isAuthenticated = async () => {
+  const authenticatedUser = await Auth.currentAuthenticatedUser();
+  console.log("authenticatedUser", authenticatedUser);
+  return authenticatedUser !== null;
+};
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -42,6 +46,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 
 class App extends React.Component {
   render() {
+    isAuthenticated();
     return (
       <BrowserRouter>
         <Routes>
