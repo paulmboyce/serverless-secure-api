@@ -26,9 +26,13 @@ Amplify.configure(awsconfig);
 console.log("AMPLIFY", JSON.stringify(awsconfig));
 
 const isAuthenticated = async () => {
-  const authenticatedUser = await Auth.currentAuthenticatedUser();
-  console.log("authenticatedUser", authenticatedUser);
-  return authenticatedUser !== null;
+  try {
+    const authenticatedUser = await Auth.currentAuthenticatedUser();
+    console.log("authenticatedUser", authenticatedUser);
+    return authenticatedUser !== null;
+  } catch (error) {
+    return false;
+  }
 };
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
